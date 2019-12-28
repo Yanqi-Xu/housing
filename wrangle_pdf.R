@@ -40,7 +40,7 @@ ct_towns <- c("Andover", "Ashford", "Avon", "Barkhamsted", "Beacon Falls",
 ct_towns_reg <- str_c(ct_towns, collapse = "|")
 
   # Create logic to read true pdfs and real pdfs differently.
-  if (listing_year %in% c("2011", "2016")) {
+  if (listing_year == "2011") {
     ct <- pdf_ocr_text(path, language = "eng")
     ct <- ct %>% read_lines() 
     
