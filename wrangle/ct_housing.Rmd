@@ -1,0 +1,243 @@
+---
+title: "ct_housing"
+output: html_document
+---
+This file wrangles tables of CT Affordable Housing Percentages from PDFs made available 2002 through 2018.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load packages}
+library(pdftools)
+library(here)
+library(tidyverse)
+library(rvest)
+library(campfin)
+library(tesseract)
+source("wrangle_pdf.R")
+```
+```{r}
+here <- here::here()
+```
+
+##Download
+Download the pdf Affordable Housing Appeals Listing (pdf) from [Connecticut State
+Department of Housing's website](https://portal.ct.gov/DOH/DOH/Programs/Affordable-Housing-Appeals-Listing). 
+
+```{r download}
+listing_url <- "https://portal.ct.gov/DOH/DOH/Programs/Affordable-Housing-Appeals-Listing"
+listings <-  read_html(listing_url) %>% 
+  html_nodes("#mainContent > section:nth-child(3) > div > div.small-12.medium-8.columns > div > p:nth-child(27) > span > a")
+
+# The first link links to the regulation file that is not part of the list.
+listings <- listings[-1]
+
+raw_dir <- here("pdf")
+dir.create(raw_dir)
+
+download_urls <- listings %>% html_attr("href") %>% 
+  str_c("https://portal.ct.gov",.)
+
+# File name constructor uses regex to extract file names within the urls.
+file_names <- {download_urls %>% str_match("DOH/(.+\\.[a-z]{3})?")}[,2]
+
+listing_path <- str_c(raw_dir, file_names, sep = "/")
+
+```
+
+```{r download files, eval=FALSE}
+if (!this_file_new(listing_path)) {
+  for (i in seq_along(download_urls)) {
+    download.file(url = download_urls[i], destfile = listing_path[i])
+  } 
+}
+```
+
+I have written a function `wrangle_odf` to pass in the file path and return a table. We will use `map_dfr` to eapply the function to the vector of all pdf files, except for year 2016, which is a scanned pdf and requires additional Optical Character Recognition(OCR).
+
+```{r, code=readLines("wrangle_pdf.R")}
+```
+
+```{r read pdf}
+# Supply headers to the data frame. Note that prior to 2011, the 'tenant_rental_assisted' column didn't exist. 
+pdf_paths <-  file_names[str_extract(file_names, "20\\d{2}") %out% c("2010", "2016")] %>% basename() %>%  str_c('pdf/',.)
+# We will use the amended list from 2012 and remove the old file from the list 
+pdf_paths <- pdf_paths[pdf_paths != "pdf/2012AppealsSummaryListpdf.pdf"]
+
+ct_df <- pdf_paths %>% map_dfr(.f = wrangle_pdf)
+
+col_stats(ct_df, count_na)
+# Some fields are read in correctly, and we will manually change them. 
+ct_df$year %>% table()
+```
+We'll use an [OCR-ed version](https://ocr.space/) of 2016.
+```{r}
+ct_lines_2016 <- pdf_text("ocr-ed_2016.pdf") %>% read_lines() %>% str_squish()
+breaks <- which(ct_lines_2016 == "")
+start_posit <- which(str_detect(ct_lines_2016, "Ansonia"))
+ct_exmp <- ct_lines_2016[start_posit:(breaks[1]-2)]
+# The bottom line is useless. The second to last line is the computation of total, which we don't really need.
+rest_posit <- (breaks[1]+6):(length(ct_lines_2016)-2)
+# The headers cover span of four lines each time
+invalid_posit <- c(breaks-1,breaks, breaks+1, breaks+2, breaks+3, breaks+4, breaks+5)
+# Remove invalid line positions
+ct_nonexmp <- ct_lines_2016[setdiff(rest_posit,invalid_posit)] 
+exmp_towns <- {ct_exmp %>% str_match("(\\D+)\\d")}[,2] %>% na.omit() %>% trimws()
+
+list_exmp_lines <- ct_exmp %>% str_split(" ") 
+
+exmp_percent_afford <- c()
+# We only need the column `town` and percent_affordable and we'll only extract those fields. This chunk extracts the last element of a list.
+for (i in seq_along(list_exmp_lines)) {
+  exmp_percent_afford[i] <- list_exmp_lines[[i]][length(list_exmp_lines[[i]])] 
+}
+
+list_nonexmp_lines <- ct_nonexmp %>% str_split(" ") 
+
+nonexmp_percent_afford <- c()
+nonexmp_towns <- c()
+# We only need the column `town` and percent_affordable and we'll only extract those fields. This chunk extracts the last element of a list.
+for (i in seq_along(list_nonexmp_lines)) {
+  nonexmp_percent_afford[i] <- list_nonexmp_lines[[i]][length(list_nonexmp_lines[[i]])] 
+  nonexmp_towns [i] <- list_nonexmp_lines[[i]][1] 
+}
+
+ct_2016_exmp <- cbind(exmp_towns, exmp_percent_afford) %>% as_tibble() %>% rename(town = exmp_towns, percent_afford = exmp_percent_afford)
+ct_2016_nonexmp <- cbind(nonexmp_towns, nonexmp_percent_afford) %>% as_tibble() %>% rename(town = nonexmp_towns, percent_afford = nonexmp_percent_afford)
+
+ct_2016 <- ct_2016_exmp %>% bind_rows(ct_2016_nonexmp)
+
+# We will borrow the ct_2017 town names to normalize the mis-OCRed town names.
+ct_2017 <- ct_df %>% filter(year == 2017)
+ct_2016 <- ct_2016 %>% mutate(quick_look = ct_2017 %>% pull(town), 
+                              first3 = str_sub(town, start = 1L, end = 3L),
+                              string_dist = str_dist(town, quick_look),
+                              swap = if_else(condition = string_dist <4 & first3 == str_sub(quick_look, start = 1L, end = 3L), true = quick_look, false = town))
+
+
+ct_2016 <- ct_2016 %>% 
+  mutate(manual = swap %>% str_replace("Bethan", "Bethany") %>% 
+             str_replace("^Brid$", "Bridgewater") %>% 
+             str_replace("^Waterbu$", "Waterbury") %>% 
+             str_replace("^Torrin ton$", "Torrington") %>% 
+             str_replace("^Cha$", "Chaplin") %>% 
+             str_replace("^Canterbu$", "Canterbury") %>% 
+             str_replace("^Covent$", "Coventry") %>% 
+             str_replace("^Dee$", "Deep River") %>% 
+             str_replace("^Ellin$", "Ellington") %>% 
+             str_replace("^Farmin$", "Farmington") %>% 
+             str_replace("^Glastonbu$", "Glastonbury") %>% 
+             str_replace("^Granb$", "Granby") %>% 
+             str_replace("^Killin$", "Killingworth") %>% 
+             str_replace("^Led$", "Ledyard") %>%
+             str_replace("^Nau$", "Naugatuck") %>% 
+             str_replace("^Newin$", "Newington") %>% 
+             str_replace("^L$", "Lyme") %>% 
+             str_replace("^PI$", "Plymouth") %>% 
+             str_replace("^Pros$", "Prospect") %>% 
+             str_replace("^Se$", "Seymour") %>%
+             str_replace("^Southbu$", "Southbury") %>% 
+             str_replace("^Southin$", "Southington") %>% 
+             str_replace("^S$", "Sprague") %>% 
+             str_replace("^Stonin$", "Stonington") %>% 
+             str_replace("^Wallin$", "Wallingford") %>% 
+             str_replace("^Washin$", "Washington") %>% 
+             str_replace("^Wallin$", "Wallingford") %>% 
+             str_replace("^Beacon$", "Beacon Falls") %>%
+           str_replace("^Burlin$", "Burlington") %>%
+           str_replace("^Beacon$", "Beacon Falls") %>%
+           str_replace("^Ham$", "Hampton") %>%
+           str_replace("^Thom$", "Thompson"),
+         new_town = coalesce(manual, swap))
+ct_2016$new_town[ct_2016$percent_afford == "3.50%"] <- "Cheshire"
+ct_2016$new_town[ct_2016$percent_afford == "2.27%"] <- "Eastford"
+ct_2016$new_town[ct_2016$percent_afford == "18.72%"] <- "Norwalk"
+ct_2016$new_town[ct_2016$percent_afford == "0.49%"] <- "Bethany"
+ct_2016$new_town[63:67] <- ct_2016$quick_look[63:67]
+ct_2016$new_town[82] <-  "Hamden"
+ct_2016$new_town[103:105] <- ct_2016$quick_look[103:105]
+ct_2016$new_town[106] <-  "New Milford"
+ct_2016$new_town[110:115] <- ct_2016$quick_look[110:115]
+ct_2016$new_town[137] <-  "South Windsor"
+ct_2016$new_town[157] <-  "West Hartford"
+ct_2016$new_town[160:163] <- ct_2016$quick_look[160:163]
+ct_2016$new_town[125:126] <- ct_2016$quick_look[125:126]
+
+ct_2016 <- ct_2016 %>%
+  select(new_town, percent_afford) %>% 
+   mutate(year = 2016,
+          percent_afford = percent_afford %>% str_replace("1.300/0", "1.30") %>% 
+            str_replace("^o%", "4.68") %>% 
+            str_replace("^4.250/0", "4.25") %>% 
+            str_replace("O.440/0", "0.44") %>% 
+            str_replace("^%$", "6.01") %>% 
+            str_replace("^851$", "7.36") %>% 
+            str_replace("^1.300/0", "1.30") %>%
+            str_replace("^4.920/0", "4.92") %>%
+            str_replace("^1470/0", "1.47") %>%
+            str_replace("^1.450/0", "1.45") %>%
+            str_remove("%") %>% as.numeric(),
+            exmp_status = case_when(percent_afford > 10 ~ "Exempt", TRUE ~ "Non-Exempt")) %>% 
+  rename(town = new_town)
+
+```
+
+Running the year command tells us that the because of some town names from 2012, 2013 and 2018 were truncated, we will need to fix them by hand. 
+```{r integrity}
+ct <- ct_df
+#2018
+ct$town[which(ct$town == "North" & ct$year == 2018)] <- "North Stonington"
+#2017
+ct$percent_afford[which(ct$town == "Windsor" & ct$exmp_status == "Exempt" & ct$year == 2012)] <- 9.15
+#2012
+ct$town[which(ct$town == "Windsor" & ct$exmp_status == "Exempt")] <- "Windsor Locks"
+ct$percent_afford[which(ct$town == "Windsor" & ct$exmp_status == "Exempt" & ct$year == 2012)] <- 9.15
+ct$town[which(ct$town == "North" & ct$percent_afford == 2.20)] <- "North Branford"
+ct$town[which(ct$town == "North" & ct$percent_afford == 0.95)] <- "North Stonington"
+#2013
+ct$town[which(ct$town == "Windsor" & ct$exmp_status == "Exempt")] <- "Windsor Locks"
+ct$percent_afford[which(ct$town == "Windsor" & ct$exmp_status == "Exempt" & ct$year == 2013)] <- 9.25
+ct$town[which(ct$town == "North" & ct$percent_afford == 2.33)] <- "North Branford"
+ct$town[which(ct$town == "North" & ct$percent_afford == 1.26)] <- "North Stonington"
+#2011
+ct$town[which(ct$town == "North" & ct$percent_afford == 0.78)] <- "North Stonington"
+ct$town[which(ct$town == "Lyme" & ct$percent_afford == 1.37)] <- "Old Lyme"
+
+ct <- ct %>% 
+  add_row(town = "Beacon Falls", percent_afford = 1.24, year = 2011, exmp_status = "Non-Exempt") %>% 
+  add_row(town ="Old Saybrook", percent_afford = 1.27, year = 2011, exmp_status = "Non-Exempt") %>% 
+  add_row(town ="Torrington", percent_afford = 12.00, year = 2011, exmp_status = "Exempt")
+```
+
+2010 file is provided in a word foc format. Clean it up in Excel and save as csv before use.
+```{r read csv}
+ct_appeals_2010 <-  read_csv("ct_appeals_2010.csv", 
+                             col_types = cols(.default = col_character()))
+
+ct_appeals_2010 <- ct_appeals_2010 %>% 
+  mutate(year = 2010,
+         percent_afford = str_remove(percent_afford, "%") %>% as.numeric(),
+         exmp_status = case_when(percent_afford > 10 ~ "Exempt", TRUE ~ "Non-Exempt"))
+
+ct <- ct %>% bind_rows(ct_appeals_2010) %>% bind_rows(ct_2016)
+
+#ct %>% filter(year == 2011) %>% pull(town) %>% setdiff(ct_towns,.) 
+
+ct$town[ct$town=="Windsor" & ct$percent_afford > 8 ] <- "Windsor Locks"
+ct$percent_afford[ct$percent_afford == 5429 ] <- 9.25
+
+```
+
+```{r reshape}
+ct_wide <-ct  %>% select(-exmp_status) %>% 
+    pivot_wider(names_from = year, values_from = percent_afford)
+```
+
+
+### Export
+```{r}
+ct_wide %>% 
+  write_csv('ct_appeals.csv', na = "")
+```
+
+
