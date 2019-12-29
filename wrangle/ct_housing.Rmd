@@ -233,6 +233,14 @@ ct_wide <-ct  %>% select(-exmp_status) %>%
     pivot_wider(names_from = year, values_from = percent_afford)
 ```
 
+```{r}
+income <- read_csv("../data/acs5y.csv")
+hsh_income <- income %>% select(NAME, S1903_C03_015E) 
+ct_towns <- ct_towns[-1]
+ct_towns_reg <- str_c(ct_towns, collapse = "|")
+hsh_income <- hsh_income %>% 
+  mutate(town = str_extract(NAME, ct_towns_reg))
+```
 
 ### Export
 ```{r}
