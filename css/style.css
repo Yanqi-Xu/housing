@@ -1,0 +1,130 @@
+.scroll__text {
+    position: relative;
+    display: inline-block;
+    top: 0;
+    bottom: auto;
+    width: 260px;
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+#sections {
+    position: relative;
+    display: inline-block;
+    width: 250px;
+    top: 0;
+    z-index: 1
+}
+
+.step {
+    margin-bottom: 200px;
+    opacity: 0.5;
+    padding: 1rem;
+}
+
+.step.is-active {
+    opacity: 1;
+}
+
+
+#sections .title {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 2px;
+    color: #8cbeed
+}
+
+#sections .pening {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 2px;
+    color: #8cbeed;
+    opacity: 1;
+}
+
+
+#container {
+    position: relative;
+}
+
+.scroll__graphic {
+    position: fixed;
+    display: inline-block;
+    top: 0;
+    bottom: auto;
+    left: 280px;
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+.scroll__graphic.is-fixed {
+    position: sticky;
+}
+
+.scroll__graphic.is-bottom {
+    bottom: 0;
+    top: auto;
+}
+
+
+.chart {
+    display: inline-block;
+    position: sticky;
+    width: 100%;
+    left: 60%;
+    z-index: 0;
+    vertical-align: right;
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+.towns:hover {
+    fill: yellow;
+}
+
+#tooltip {
+    width: 240px;
+    color: #FFFFFF;
+    font-size: 15px;
+    text-shadow: 0px 0px 1px #000000;
+    background: #575757;
+    height: 50px;
+    padding: 2px;
+    line-height: 15px;
+    text-align: left;
+    border-radius: 6px;
+}
+
+#sliderContainer {
+    text-align: center;
+    position: relative;
+    width: 900px;
+    top: 600px;
+}
+
+.axis line {
+    fill: none;
+    stroke: #000000;
+    shape-rendering: crispEdges;
+}
+
+text {
+    font-size: 1.8em;
+}
+
+/* #vis {
+    display: inline-block;
+    position: fixed;
+    top: 60px;
+    z-index: 1;
+    margin-left: 0;
+
+    height: 600px;
+    width: 600px;
+    background-color: #ddd;
+} */
