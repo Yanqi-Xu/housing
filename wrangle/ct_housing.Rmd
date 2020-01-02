@@ -239,7 +239,12 @@ hsh_income <- income %>% select(NAME, S1903_C03_015E)
 ct_towns <- ct_towns[-1]
 ct_towns_reg <- str_c(ct_towns, collapse = "|")
 hsh_income <- hsh_income %>% 
-  mutate(town = str_extract(NAME, ct_towns_reg))
+  rename(income = S1903_C03_015E) %>% 
+  mutate(town = str_extract(NAME, ct_towns_reg),
+         income = str_remove(income,",") %>% as.numeric())
+
+
+  
 ```
 
 ### Export

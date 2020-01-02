@@ -1,0 +1,18 @@
+{
+  "google": {
+    "doc": [{
+        "id": "1Ntae_ORdUiPinTOLYAZJxoPkMSDKrOV6umPOm5DyZoI",
+        "filepath": "data/doc.json"
+      },
+      {
+        "id": "",
+        "filepath": ""
+      }
+    ],
+    "sheet": [{
+      "id": "",
+      "gid": "",
+      "filepath": ""
+    }]
+  }
+}

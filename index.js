@@ -21,14 +21,11 @@ const g = svg.append("g")
 
 // Width and Height of the whole visualization
 // Set Projection Parameters
-const albersProjection = d3.geoAlbers()
-    .scale(10000)
+/* const albersProjection = d3.geoAlbers()
     .rotate([71.057, 0])
     .center([0, 42.313])
-    .translate([width / 2, height / 2]);
+    .translate([width / 2, height / 2]); */
 
-const geoPath = d3.geoPath()
-    .projection(albersProjection);
 
 d3.select('body')
     .append('div')
@@ -43,11 +40,28 @@ const width_slider = 920;
 const height_slider = 50;
 
 Promise.all([
+    d3.json('data/doc.json'),
     d3.csv('data/ct_appeals.csv'),
     d3.json('shapefiles/ct_towns.json')
-]).then(([csvData, ct]) => {
+]).then(([copy, csvData, ct]) => {
     const topo = ct.features[0];
-    const towns = topojson.feature(topo, topo.objects.ct_towns).features;
+    const topoTown = topojson.feature(topo, topo.objects.ct_towns);
+    const towns = topoTown.features;
+    var albersProjection = d3.geoTransverseMercator()
+        .rotate([72.057, 41.513])
+        .fitExtent([
+            [10, 10],
+            [height - 10, width - 10]
+        ], topoTown);
+
+
+    d3.select('body')
+        .append('p')
+        .append('text')
+        .text('hey')
+
+    const geoPath = d3.geoPath()
+        .projection(albersProjection);
     //svg.append("g")
     /* const appeals = {};
         csvData.forEach(d => {
@@ -93,7 +107,6 @@ Promise.all([
     }
 
     inputValue = document.getElementById("range").value
-
     g.selectAll('path')
         .data(towns)
         .join('path')
