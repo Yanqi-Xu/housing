@@ -31,10 +31,11 @@ const color = d3.scaleQuantize([0, 10], d3.schemeBlues[9]);
 const g = svg.append("g")
 
 
-$graphic
+const tooltip = d3.select("body")
     .append('div')
     .attr('id', 'tooltip')
-    .attr('style', 'position: absolute; opacity: 0;');
+    .attr('style', 'position: absolute;')
+    .style('opacity',0);
 
 d3.select("#rate").html(
     "Year: " + year[year.length - 1]
@@ -91,7 +92,7 @@ Promise.all([
             .on('mouseover', d => d3.select('#tooltip')
                 .transition()
                 .duration(200)
-                .style('opacity', 1)
+                .style('opacity', 0)
                 .text(d.properties.town + ", " + yearSelector(value)[d.properties.town] + "% of housing units are available at affordable rate"))
     }
 
@@ -109,11 +110,11 @@ Promise.all([
         .on('mousemove', d => d3.select('#tooltip').style('left', (d3.event.pageX + 10) + 'px').style('top', (d3.event.pageY + 10) + 'px'))
         .on('mouseout', d => d3.select('#tooltip').style('opacity', 0));
 
-    svg.append("path")
+    svg.append('path')
         .datum(topojson.mesh(topo, topo.objects.ct_towns, (a, b) => a !== b))
         .attr('fill', "none")
         .attr('stroke', 'white')
-        .attr('opacity', 1)
+        .attr('opacity', 0)
         .attr("d", geoPath);
 });
 
@@ -160,7 +161,7 @@ d3.csv('../data/ct_2018.csv').then((scatterData) => {
         //separate the two axes
         .attr('padding', 0.1);
 
-    g.selectAll("circle")
+    plot.selectAll("circle")
         .data(scatterData)
         .join("circle")
         .attr("cx", function (d) {
@@ -252,6 +253,14 @@ function showMap() {
         .transition()
         .duration(300)
         .attr('opacity', 1);
+
+    tooltip
+    .style('opacity', 1);
+
+    plot
+    .transition(600)
+    .duration(300)
+    .style('opacity', 1);
 }
 
 // scrollama event handlers
@@ -260,6 +269,7 @@ function handleStepEnter(response) {
     console.log(response.index)
 
     showMap();
+
 
     // fade in current step
     $step.classed('is-active', function (d, i) {
