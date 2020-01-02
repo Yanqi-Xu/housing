@@ -1,0 +1,170 @@
+town,afford_percent,income,exmpt_status
+Ansonia,15.18,70407,Exempt
+Bloomfield,10.88,94459,Exempt
+Bridgeport,20.33,51801,Exempt
+Bristol,13.35,83646,Exempt
+Danbury,10.83,81125,Exempt
+Derby,11.51,69053,Exempt
+East Hartford,15.66,68854,Exempt
+East Windsor,14.17,90559,Exempt
+Enfield,12.41,89995,Exempt
+Groton,22.52,81619,Exempt
+Hartford,38.67,39453,Exempt
+Killingly,10.99,79021,Exempt
+Manchester,14.2,83437,Exempt
+Meriden,15.75,75370,Exempt
+Middletown,22.1,91130,Exempt
+New Britain,18.16,53714,Exempt
+New Haven,31.88,49239,Exempt
+New London,22.47,46776,Exempt
+Norwalk,12.75,95743,Exempt
+Norwich,18.73,66378,Exempt
+Plainfield,12.59,76291,Exempt
+Putnam,12.31,70448,Exempt
+Stamford,15.12,106778,Exempt
+Torrington,10.66,79572,Exempt
+Vernon,16.5,85117,Exempt
+Waterbury,20.93,51737,Exempt
+West Haven,13.21,72711,Exempt
+Winchester,11.01,78152,Exempt
+Windham,28.56,46205,Exempt
+Andover,3.42,115323,Non-Exempt
+Ashford,3.36,98476,Non-Exempt
+Avon,3.94,165179,Non-Exempt
+Barkhamsted,1.38,114760,Non-Exempt
+Beacon Falls,1.71,121736,Non-Exempt
+Berlin,9.23,116510,Non-Exempt
+Bethany,0.59,138958,Non-Exempt
+Bethel,5.85,120401,Non-Exempt
+Bethlehem,2.03,123194,Non-Exempt
+Bolton,1.29,115605,Non-Exempt
+Bozrah,3.02,90917,Non-Exempt
+Branford,3.21,102260,Non-Exempt
+Bridgewater,0.11,115417,Non-Exempt
+Brookfield,5.36,123890,Non-Exempt
+Brooklyn,9.61,84731,Non-Exempt
+Burlington,1.89,137300,Non-Exempt
+Canaan,5.78,91705,Non-Exempt
+Canterbury,6.51,100781,Non-Exempt
+Canton,7.01,101484,Non-Exempt
+Chaplin,3.24,84063,Non-Exempt
+Cheshire,3.68,133253,Non-Exempt
+Chester,2.03,112804,Non-Exempt
+Clinton,2.79,97560,Non-Exempt
+Colchester,8.52,112261,Non-Exempt
+Colebrook,0.97,110568,Non-Exempt
+Columbia,3.64,110508,Non-Exempt
+Cornwall,3.28,97708,Non-Exempt
+Coventry,4.84,115417,Non-Exempt
+Cromwell,6.77,113250,Non-Exempt
+Darien,3.56,25000,Non-Exempt
+Deep River,2.86,91439,Non-Exempt
+Durham,2,123795,Non-Exempt
+Eastford,1.89,95104,Non-Exempt
+East Granby,5.34,108438,Non-Exempt
+East Haddam,2.8,102359,Non-Exempt
+East Hampton,3.23,117905,Non-Exempt
+East Haven,7.96,83460,Non-Exempt
+East Lyme,5.88,113237,Non-Exempt
+Easton,0.59,170655,Non-Exempt
+Ellington,5.45,119794,Non-Exempt
+Essex,2.91,120144,Non-Exempt
+Fairfield,2.43,163220,Non-Exempt
+Farmington,7.88,127045,Non-Exempt
+Franklin,5.58,119792,Non-Exempt
+Glastonbury,5.41,139345,Non-Exempt
+Goshen,0.24,125833,Non-Exempt
+Granby,3.1,134691,Non-Exempt
+Greenwich,5.06,183559,Non-Exempt
+Griswold,6.68,62632,Non-Exempt
+Guilford,2.39,130398,Non-Exempt
+Haddam,1.4,126542,Non-Exempt
+Hamden,8.47,98824,Non-Exempt
+Hampton,1.77,81667,Non-Exempt
+Hartland,0.7,105000,Non-Exempt
+Harwinton,2.23,114635,Non-Exempt
+Hebron,2.8,124063,Non-Exempt
+Kent,2.52,95156,Non-Exempt
+Killingworth,0.96,135610,Non-Exempt
+Lebanon,3.36,99595,Non-Exempt
+Ledyard,4.13,111744,Non-Exempt
+Lisbon,2.89,100192,Non-Exempt
+Litchfield,4.7,105378,Non-Exempt
+Lyme,2.53,110000,Non-Exempt
+Madison,1.64,129022,Non-Exempt
+Mansfield,6.71,104773,Non-Exempt
+Marlborough,2.13,124271,Non-Exempt
+Middlebury,4.25,120192,Non-Exempt
+Middlefield,2.74,118864,Non-Exempt
+Milford,5.28,113143,Non-Exempt
+Monroe,1.34,138632,Non-Exempt
+Montville,4.97,84888,Non-Exempt
+Morris,2.21,110938,Non-Exempt
+Naugatuck,8.52,87550,Non-Exempt
+New Canaan,3.44,248264,Non-Exempt
+New Fairfield,1.43,127246,Non-Exempt
+New Hartford,2.77,127386,Non-Exempt
+Newington,8.58,99460,Non-Exempt
+New Milford,4.34,111305,Non-Exempt
+Newtown,2.46,149384,Non-Exempt
+Norfolk,1.65,107639,Non-Exempt
+North Branford,2.22,104598,Non-Exempt
+North Canaan,9.58,100357,Non-Exempt
+North Haven,5.34,121774,Non-Exempt
+North Stonington,1.39,108224,Non-Exempt
+Old Lyme,1.61,135083,Non-Exempt
+Old Saybrook,2.46,100966,Non-Exempt
+Orange,1.37,136637,Non-Exempt
+Oxford,1.52,114593,Non-Exempt
+Plainville,6.65,91029,Non-Exempt
+Plymouth,7.12,97207,Non-Exempt
+Pomfret,2.79,121316,Non-Exempt
+Portland,8.29,118359,Non-Exempt
+Preston,4.21,90298,Non-Exempt
+Prospect,1.5,112644,Non-Exempt
+Redding,0.37,157455,Non-Exempt
+Ridgefield,2.96,187847,Non-Exempt
+Rocky Hill,5.09,105651,Non-Exempt
+Roxbury,2.06,152885,Non-Exempt
+Salem,1.96,129205,Non-Exempt
+Salisbury,1.27,109883,Non-Exempt
+Scotland,3.24,96167,Non-Exempt
+Seymour,5.75,97117,Non-Exempt
+Sharon,2.03,110776,Non-Exempt
+Shelton,3.12,111530,Non-Exempt
+Sherman,0.38,121532,Non-Exempt
+Simsbury,4.68,146250,Non-Exempt
+Somers,5.2,117122,Non-Exempt
+Southbury,1.42,122738,Non-Exempt
+Southington,5.38,110950,Non-Exempt
+South Windsor,6.79,123218,Non-Exempt
+Sprague,5.13,69766,Non-Exempt
+Stafford,7.49,90000,Non-Exempt
+Sterling,2.32,79054,Non-Exempt
+Stonington,5.86,99012,Non-Exempt
+Stratford,6.37,92062,Non-Exempt
+Suffield,5.72,128942,Non-Exempt
+Thomaston,5.83,91343,Non-Exempt
+Thompson,5.2,92717,Non-Exempt
+Tolland,3.25,136000,Non-Exempt
+Trumbull,4.5,137602,Non-Exempt
+Union,1.29,112500,Non-Exempt
+Voluntown,3.99,97125,Non-Exempt
+Wallingford,4.16,107398,Non-Exempt
+Warren,0,118571,Non-Exempt
+Washington,2.07,122586,Non-Exempt
+Waterford,4.47,105202,Non-Exempt
+Watertown,4.67,98266,Non-Exempt
+Westbrook,5.11,140000,Non-Exempt
+West Hartford,7.46,131536,Non-Exempt
+Weston,0.19,25000,Non-Exempt
+Westport,3.37,25000,Non-Exempt
+Wethersfield,9.22,106020,Non-Exempt
+Willington,7.43,105512,Non-Exempt
+Wilton,4,211646,Non-Exempt
+Windsor,6.85,102898,Non-Exempt
+Windsor Locks,9.01,88086,Non-Exempt
+Wolcott,7.55,99347,Non-Exempt
+Woodbridge,1.24,158259,Non-Exempt
+Woodbury,1.86,95976,Non-Exempt
+Woodstock,1.59,102470,Non-Exempt

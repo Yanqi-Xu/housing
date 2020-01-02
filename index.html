@@ -1,61 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-	<title>Mapping with D3</title>
-	<script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://d3js.org/topojson.v1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
-    
-    <style>
-    h1 {
-        position: absolute;
-        left: 100px;
-        font-size: 1.3em;
-        font-weight: 100;
-        font-family: sans-serif;
-    }
-    .towns:hover{
-            fill: yellow;
-        }
-        #sliderContainer {
-        text-align: center;
-        position: relative;
-        top: 600px;
-    }
-    #tooltip { 
-    text-align: left;  
-    width: 250px;          
-    height: 50px;         
-    padding: 2px;       
-    font: 12px sans-serif;   
-    background: #A8D7F3; 
-    border: 0px;    
-    border-radius: 4px;     
-    pointer-events: none;     
-    }
-    input{
-        border: none;
-        border-radius: 0;
-        border-bottom: solid 1px #ddd;
-        font-size: 18px;
-        line-height: 32px;
-        margin:16px 0;
-        padding: 6px 0 0 0;
-      }
+<html>
 
-    </style>
-    
+<head>
+    <title>Scrolling Sections</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+    <script src="https://unpkg.com/scrollama"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
 </head>
+
 <body>
-    
-    <h1>Connencticut Affordable Housing Percentage, 2002-2019</h1>
-    <h2></h2>
-    <div id="sliderContainer">
-            <input id="timeslide" type="range" min="0" max="16" value="0" step="1"/><br>
-            <span id="range">2005</span>
+    <div id="container">
+        <div class='scroll__graphic'>
+            <div class='chart'>
+                <div id="sliderContainer">
+                    <input id="timeslide" type="range" min="0" max="16" value="0" step="1" /><br>
+                    <span id="range">2005</span>
+                </div>
+            </div>
+        </div>
+        <div class='scroll__text'>
+            <div id="sections">
+                <section class="step">
+                    <div class="title">
+                        As the wealthiest state in the U.S., Connecticut is short of affordable housing options.
+                    </div>
+                </section>
+                <section class="step">
+                    <div class="title">What's affordable housing?</div>
+                    For a housing unit to be considered affordable, it should cost no more than 30% of the monthly
+                    income of a family’s earning slightly less than the Average Median Income.
+                </section>
+                <section class="step">
+                    <div class="title">Income and affordable housing avaialability</div>
+                    Within the state, the higher the median household income, the lower the percentage of affordable
+                    housing units.
+                </section>
+                <section class="step">
+                    <div class="title">
+                        The rate hasn’t improved. In fact, 99 towns have a smaller share of housing deemed
+                        affordable
+                        from 2002 to 2018, the most recent year of available data.
+                    </div>
+                </section>
+            </div>
+        </div>
+
     </div>
-    <div id = "rate"></div>
-    <script src = "index.js"></script>
-	<!-- Page elements and content go here. -->
+    <script type="module" src="js/sections.js">
+    </script>
 </body>
+
 </html>
