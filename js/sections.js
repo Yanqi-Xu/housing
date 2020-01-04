@@ -13,11 +13,25 @@ let year = ["2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "201
 
 const activateFunction = [];
 
-
 // Width and Height of the whole visualization
 //changed from 600
 const width = 800;
 const height = 520;
+
+const margin = {
+    top: 10,
+    right: 30,
+    bottom: 45,
+    left: 60
+}
+
+$chart.append('div')
+    .attr('class', 'bar')
+    .attr('transform', `translate(${width/2 +margin.left},${height/2})`);
+$chart.append('div')
+    .attr('class', 'outline');
+$chart.append('div')
+    .attr('class', 'hline')
 
 // Create SVG
 const svg = $chart
@@ -31,11 +45,11 @@ const color = d3.scaleQuantize([0, 10], d3.schemeBlues[9]);
 const g = svg.append("g")
 
 
-const tooltip = d3.select("body")
+d3.select("body")
     .append('div')
     .attr('id', 'tooltip')
     .attr('style', 'position: absolute;')
-    .style('opacity',0);
+    .style('background-color', 'rgba(30, 32, 32, 0)');
 
 d3.select("#rate").html(
     "Year: " + year[year.length - 1]
@@ -92,7 +106,7 @@ Promise.all([
             .on('mouseover', d => d3.select('#tooltip')
                 .transition()
                 .duration(200)
-                .style('opacity', 0)
+                .style('background-color', 'rgba(30, 32, 32, 0)')
                 .text(d.properties.town + ", " + yearSelector(value)[d.properties.town] + "% of housing units are available at affordable rate"))
     }
 
@@ -118,13 +132,6 @@ Promise.all([
         .attr("d", geoPath);
 });
 
-const margin = {
-    top: 10,
-    right: 30,
-    bottom: 30,
-    left: 60
-}
-
 const plotWidth = width - margin.left - margin.right;
 const plotHeight = height - margin.top - margin.bottom;
 
@@ -133,6 +140,11 @@ const plot = svg.append('g')
 
 d3.csv('../data/ct_2018.csv').then((scatterData) => {
     //scale the range  
+
+    const plotdiv = d3.select("body").append('div')
+        .attr("class", "plotdiv")
+        .attr('style', 'position: absolute;')
+        .style("opacity", 0);
 
     scatterData.forEach((d) => {
         d.income = +d.income;
@@ -150,19 +162,30 @@ d3.csv('../data/ct_2018.csv').then((scatterData) => {
     const xAxis = d3.axisBottom(xScale).tickFormat(d3.format('.0s'));
     const yAxis = d3.axisLeft(yScale).tickFormat(d3.format('.0%'));
 
-    plot.append('g')
+    const xAxisG = plot.append('g')
         .attr('class', 'x_axis')
         .attr('transform', `translate(0,${plotHeight})`)
         .call(xAxis);
 
-    plot.append('g')
+    xAxisG.append('text')
+        .attr('y', 32)
+        .attr('x', plotWidth / 2)
+        .text('Median Household Income')
+        .attr('fill', 'black')
+
+    plot.append('text')
+        .attr('id', 'plotcaption')
+        .attr('y', plotHeight)
+        .attr('x', plotWidth / 2 + 50)
+        .text("Source: Connecticut Dept. of Housing, ACS 2014-2018 5-Year Estimate")
+
+    const yAxisG = plot.append('g')
         .attr('class', 'y_axis')
         .call(yAxis)
         //separate the two axes
         .attr('padding', 0.1);
-
-    plot.selectAll("circle")
-        .data(scatterData)
+    const circles = plot.selectAll("circle").data(scatterData);
+    circles
         .join("circle")
         .attr("cx", function (d) {
             return xScale(d.income)
@@ -176,23 +199,25 @@ d3.csv('../data/ct_2018.csv').then((scatterData) => {
             d3.select(this)
                 .attr("stroke", "black")
                 .attr('opacity', .7)
-            div.transition()
+            plotdiv.transition()
                 .duration(200)
                 .style("opacity", .9)
-                .style("stroke", "black")
-            div.html("This is" + " " + "<strong>" + d.state + "</strong>" + ", where " + d3.round(d.ownership, 2) + "% of people own firearms." +
-                    "</br>" + Math.round(d.death) + " out of 100,000 people die from guns.")
-                .style("left", xScale(d.ownership) + 'px')
-                .style("top", yScale(d.death) + margin.top - 20 + 'px');
+                .style("stroke", "black");
+            plotdiv.html("This is" + " " + "<strong>" + d.town + "</strong>" + ", where the median income is" + d.income +
+                    ",</br>", `and ${d.afford_percent}% of housing units are affordable.`)
+                .style('left', (d3.event.pageX + 10) + 'px')
+                .style('top', (d3.event.pageY + 10) + 'px');
+            //.style("top", yScale(d.afford_percent) + margin.top - 20 + 'px');
         })
         .on("mouseout", function (d) {
             d3.select(this)
                 .attr("stroke", "none")
                 .attr('opacity', 1)
-            div.transition()
+            plotdiv.transition()
                 .duration(500)
                 .style("opacity", 0);
         });;
+    circles.exit().remove();
 })
 
 function init() {
@@ -254,13 +279,13 @@ function showMap() {
         .duration(300)
         .attr('opacity', 1);
 
-    tooltip
-    .style('opacity', 1);
+    /*     d3.selectAll('#tooltip')
+            .style('background-color', 'rgba(30, 32, 32, 0.34)'); */
 
     plot
-    .transition(600)
-    .duration(300)
-    .style('opacity', 1);
+        .transition(600)
+        .duration(300)
+        .style('opacity', 1);
 }
 
 // scrollama event handlers
