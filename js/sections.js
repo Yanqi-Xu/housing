@@ -1,6 +1,6 @@
 //import * as d3 from "../node_modules/d3-selection/dist/d3-selection.js";
 // using d3 for convenience, and storing a selected elements
-const $container = d3.select('#container');
+const $container = d3.select('.container');
 const $graphic = d3.select('.scroll__graphic');
 const $chart = d3.select('.chart');
 const $text = d3.select('.scroll__text');
@@ -25,13 +25,31 @@ const margin = {
     left: 60
 }
 
-$chart.append('div')
-    .attr('class', 'bar')
-    .attr('transform', `translate(${width/2 +margin.left},${height/2})`);
-$chart.append('div')
+const burden = $chart.append('g')
+.attr("class", "burden")
+
+burden.append('div')
+    .attr('class', 'bar');
+    burden.append('div')
     .attr('class', 'outline');
-$chart.append('div')
+    burden.append('div')
     .attr('class', 'hline')
+
+burden.append('div')
+.text(`HUD: A household should not spend more
+    than 30% of its income on housing`)
+
+function barAnimation() {
+    burden.select('.hline')
+    .transition()
+    .duration(500)
+    .style('border-top','2px dashed black')
+    .ease('sin-in')
+    .transition()
+    .duration(300)
+    .attr('border-top','2px dashed red')
+    .ease('bounce-in');
+}
 
 // Create SVG
 const svg = $chart
@@ -130,12 +148,35 @@ Promise.all([
         .attr('stroke', 'white')
         .attr('opacity', 0)
         .attr("d", geoPath);
-});
+
+        g.append("g")
+        .attr("class", "legend")
+        .style("font-size","12px")
+        .attr("transform", "translate(120,120)");
+      
+      var legend = d3.legendColor()
+      .labelFormat(d3.format(".1f"))
+      //.labelFormat(() => `${d3.format(".1f")()%}`)    
+      .shapeWidth(30)
+        .scale(color);
+      
+      g.select(".legend")
+        .call(legend);
+      
+
+/*         csvData.title = "Percentage of Affordable Housing Units"
+        svg.append("g")
+        .attr('class', 'legend')
+        .attr("transform", "translate(610,20)")
+        .style("font-size", '12px')
+        .append(() => d3.legend({color, title: csvData.title, width: 260})); */
+}); 
 
 const plotWidth = width - margin.left - margin.right;
 const plotHeight = height - margin.top - margin.bottom;
 
 const plot = svg.append('g')
+.attr('opacity', '0')
     .attr('transform', `translate(${margin.left},${margin.top})`)
 
 d3.csv('../data/ct_2018.csv').then((scatterData) => {
@@ -203,8 +244,8 @@ d3.csv('../data/ct_2018.csv').then((scatterData) => {
                 .duration(200)
                 .style("opacity", .9)
                 .style("stroke", "black");
-            plotdiv.html("This is" + " " + "<strong>" + d.town + "</strong>" + ", where the median income is" + d.income +
-                    ",</br>", `and ${d.afford_percent}% of housing units are affordable.`)
+            plotdiv.html("This is" + " " + "<strong>" + d.town + "</strong>" + ", where the median income is" + d3.format(",.2r")(d.income) +
+                    ",</br>" + ` and ${d3.format(".0%")(d.afford_percent)}% of housing units are affordable.`)
                 .style('left', (d3.event.pageX + 10) + 'px')
                 .style('top', (d3.event.pageY + 10) + 'px');
             //.style("top", yScale(d.afford_percent) + margin.top - 20 + 'px');
@@ -292,10 +333,10 @@ function showMap() {
 function handleStepEnter(response) {
     // response = { element, direction, index }
     console.log(response.index)
-
+    //plot.attr('opacity', '1')
     showMap();
 
-
+    barAnimation();
     // fade in current step
     $step.classed('is-active', function (d, i) {
         return i === response.index;
