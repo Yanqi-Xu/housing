@@ -26,29 +26,29 @@ const margin = {
 }
 
 const burden = $chart.append('g')
-.attr("class", "burden")
+    .attr("class", "burden")
 
 burden.append('div')
     .attr('class', 'bar');
-    burden.append('div')
+burden.append('div')
     .attr('class', 'outline');
-    burden.append('div')
+burden.append('div')
     .attr('class', 'hline')
 
 burden.append('div')
-.text(`HUD: A household should not spend more
+    .text(`HUD: A household should not spend more  
     than 30% of its income on housing`)
 
 function barAnimation() {
     burden.select('.hline')
-    .transition()
-    .duration(500)
-    .style('border-top','2px dashed black')
-    .ease('sin-in')
-    .transition()
-    .duration(300)
-    .attr('border-top','2px dashed red')
-    .ease('bounce-in');
+        .transition()
+        .duration(500)
+        .style('border-top', '2px dashed black')
+        .ease('sin-in')
+        .transition()
+        .duration(300)
+        .attr('border-top', '2px dashed red')
+        .ease('bounce-in');
 }
 
 // Create SVG
@@ -149,34 +149,35 @@ Promise.all([
         .attr('opacity', 0)
         .attr("d", geoPath);
 
-        g.append("g")
+    g.append("g")
         .attr("class", "legend")
-        .style("font-size","12px")
+        .style("font-size", "12px")
         .attr("transform", "translate(120,120)");
-      
-      var legend = d3.legendColor()
-      .labelFormat(d3.format(".1f"))
-      //.labelFormat(() => `${d3.format(".1f")()%}`)    
-      .shapeWidth(30)
-        .scale(color);
-      
-      g.select(".legend")
-        .call(legend);
-      
 
-/*         csvData.title = "Percentage of Affordable Housing Units"
-        svg.append("g")
-        .attr('class', 'legend')
-        .attr("transform", "translate(610,20)")
-        .style("font-size", '12px')
-        .append(() => d3.legend({color, title: csvData.title, width: 260})); */
-}); 
+    var legend = d3.legendColor()
+        .labelFormat(d3.format(".1f"))
+        //.labelFormat(() => `${d3.format(".1f")()%}`)    
+        .shapeWidth(30)
+        .scale(color);
+
+    g.select(".legend")
+        .call(legend);
+
+
+    /*         csvData.title = "Percentage of Affordable Housing Units"
+            svg.append("g")
+            .attr('class', 'legend')
+            .attr("transform", "translate(610,20)")
+            .style("font-size", '12px')
+            .append(() => d3.legend({color, title: csvData.title, width: 260})); */
+});
 
 const plotWidth = width - margin.left - margin.right;
 const plotHeight = height - margin.top - margin.bottom;
 
 const plot = svg.append('g')
-.attr('opacity', '0')
+    .attr('class', 'scatter')
+    .style('opacity', '0')
     .attr('transform', `translate(${margin.left},${margin.top})`)
 
 d3.csv('../data/ct_2018.csv').then((scatterData) => {
@@ -184,8 +185,7 @@ d3.csv('../data/ct_2018.csv').then((scatterData) => {
 
     const plotdiv = d3.select("body").append('div')
         .attr("class", "plotdiv")
-        .attr('style', 'position: absolute;')
-        .style("opacity", 0);
+        .attr('style', 'position: absolute;');
 
     scatterData.forEach((d) => {
         d.income = +d.income;
@@ -223,6 +223,7 @@ d3.csv('../data/ct_2018.csv').then((scatterData) => {
     const yAxisG = plot.append('g')
         .attr('class', 'y_axis')
         .call(yAxis)
+        .style('opacity', '0')
         //separate the two axes
         .attr('padding', 0.1);
     const circles = plot.selectAll("circle").data(scatterData);
@@ -323,10 +324,10 @@ function showMap() {
     /*     d3.selectAll('#tooltip')
             .style('background-color', 'rgba(30, 32, 32, 0.34)'); */
 
-    plot
-        .transition(600)
-        .duration(300)
-        .style('opacity', 1);
+    /*     plot
+            .transition(600)
+            .duration(300)
+            .style('opacity', 1); */
 }
 
 // scrollama event handlers
@@ -336,7 +337,7 @@ function handleStepEnter(response) {
     //plot.attr('opacity', '1')
     showMap();
 
-    barAnimation();
+    //barAnimation();
     // fade in current step
     $step.classed('is-active', function (d, i) {
         return i === response.index;
