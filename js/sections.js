@@ -27,6 +27,7 @@ const margin = {
 
 const burden = $chart.append('g')
     .attr("class", "burden")
+    .style('opacity','0')
 
 burden.append('div')
     .attr('class', 'bar');
@@ -57,7 +58,7 @@ const svg = $chart
     .attr("width", width)
     .attr("height", height);
 
-const color = d3.scaleQuantize([0, 10], d3.schemeBlues[9]);
+const color = d3.scaleQuantize([0, 20], d3.schemeBlues[9]);
 // Append empty placeholder g element to the SVG
 // g will contain geometry elements
 const g = svg.append("g")
@@ -67,7 +68,8 @@ d3.select("body")
     .append('div')
     .attr('id', 'tooltip')
     .attr('style', 'position: absolute;')
-    .style('background-color', 'rgba(30, 32, 32, 0)');
+    .style('background-color', 'rgba(30, 32, 32, 0)')
+    .style('opacity','0');
 
 d3.select("#rate").html(
     "Year: " + year[year.length - 1]
@@ -84,12 +86,23 @@ Promise.all([
     const topo = ct.features[0];
     const topoTown = topojson.feature(topo, topo.objects.ct_towns);
     const towns = topoTown.features;
-    var albersProjection = d3.geoTransverseMercator()
+    var mercatorProjection = d3.geoTransverseMercator()
         .rotate([72.057, 41.513])
         .fitExtent([
             [10, 10],
             [height - 10, width - 10]
         ], topoTown);
+
+        var albersProjection = d3.geoAlbers()
+        .scale( 9000 )
+        .rotate( [71.057,0] )
+        .center( [0, 42.313] )
+        //.translate( [width/2,height/2] )
+        .fitExtent([
+            [10, 10],
+            [890,  510]
+        ], topoTown);
+
 
     const geoPath = d3.geoPath()
         .projection(albersProjection);
@@ -103,11 +116,11 @@ Promise.all([
     }
 
     // when the input range changes update the value 
+
     d3.select("#timeslide").on("input", function () {
         update(+this.value);
         tooltipUpdate(+this.value)
     });
-
 
     // update the color of each town
     function update(value) {
@@ -124,12 +137,12 @@ Promise.all([
             .on('mouseover', d => d3.select('#tooltip')
                 .transition()
                 .duration(200)
-                .style('background-color', 'rgba(30, 32, 32, 0)')
+                //.style('background-color', 'rgba(30, 32, 32, 0)')
                 .text(d.properties.town + ", " + yearSelector(value)[d.properties.town] + "% of housing units are available at affordable rate"))
     }
 
     inputValue = document.getElementById("range").value
-    g.selectAll('path')
+   const map = g.selectAll('path')
         .data(towns)
         .join('path')
         .attr("class", "towns")
@@ -138,7 +151,8 @@ Promise.all([
         .attr('fill', data => {
             return color(yearSelector(0)[data.properties.town])
         })
-        .on('mouseover', d => d3.select('#tooltip').transition().duration(200).style('opacity', 1).text(d.properties.town + ",\n Total percentage of affordable housing: " + yearSelector(0)[d.properties.town] + "%"))
+        
+        map.on('mouseover', d => d3.select('#tooltip').transition().duration(200).style('opacity', 0).text(d.properties.town + ",\n Total percentage of affordable housing: " + yearSelector(0)[d.properties.town] + "%"))
         .on('mousemove', d => d3.select('#tooltip').style('left', (d3.event.pageX + 10) + 'px').style('top', (d3.event.pageY + 10) + 'px'))
         .on('mouseout', d => d3.select('#tooltip').style('opacity', 0));
 
@@ -148,20 +162,6 @@ Promise.all([
         .attr('stroke', 'white')
         .attr('opacity', 0)
         .attr("d", geoPath);
-
-    g.append("g")
-        .attr("class", "legend")
-        .style("font-size", "12px")
-        .attr("transform", "translate(120,120)");
-
-    var legend = d3.legendColor()
-        .labelFormat(d3.format(".1f"))
-        //.labelFormat(() => `${d3.format(".1f")()%}`)    
-        .shapeWidth(30)
-        .scale(color);
-
-    g.select(".legend")
-        .call(legend);
 
 
     /*         csvData.title = "Percentage of Affordable Housing Units"
@@ -208,7 +208,14 @@ d3.csv('../data/ct_2018.csv').then((scatterData) => {
         .attr('transform', `translate(0,${plotHeight})`)
         .call(xAxis);
 
-    xAxisG.append('text')
+
+    const yAxisG = plot.append('g')
+        .attr('class', 'y_axis')
+        .call(yAxis)
+        //separate the two axes
+        .attr('padding', 0.1);
+
+        xAxisG.append('text')
         .attr('y', 32)
         .attr('x', plotWidth / 2)
         .text('Median Household Income')
@@ -218,14 +225,15 @@ d3.csv('../data/ct_2018.csv').then((scatterData) => {
         .attr('id', 'plotcaption')
         .attr('y', plotHeight)
         .attr('x', plotWidth / 2 + 50)
-        .text("Source: Connecticut Dept. of Housing, ACS 2014-2018 5-Year Estimate")
+        .text("Source: T Dept. of Housing, ACS 2014-2018")
+        
+        yAxisG.append('text')
+        .attr('y', 300)
+        .attr('x', 300)
+        .text('Rate of Affordable Units, %')
+        .attr('fill', 'black')
+        .attr('transform','rotate(90)');
 
-    const yAxisG = plot.append('g')
-        .attr('class', 'y_axis')
-        .call(yAxis)
-        .style('opacity', '0')
-        //separate the two axes
-        .attr('padding', 0.1);
     const circles = plot.selectAll("circle").data(scatterData);
     circles
         .join("circle")
@@ -313,13 +321,169 @@ function handleResize() {
 }
 
 
-activateFunction[0] = showMap;
+function showBar() {
+    burden
+    .transition()
+    .duration(200)
+    .style('opacity', 1)
+}
 
+function showPlot() {
+    burden
+    .transition()
+    .duration(300)
+    .style('opacity', 0);
+    
+    plot
+    .transition()
+    .delay(500)
+	.duration(1000)
+	.ease(d3.easeBounce)
+    .style('opacity', 1);
+}
+
+/* activateFunction[1] = showBar();
+activateFunction[2] = showPlot();
+activateFunction[3] = showMap();
+
+
+ */
 function showMap() {
+    plot
+    .transition()
+	.duration(600)
+    .style('opacity', 0);
+
     g.selectAll('path')
         .transition()
+        .delay(400)
         .duration(300)
         .attr('opacity', 1);
+    
+        d3.select('#timeslide')
+        .delay(400)
+        .duration(300)
+        .style('opacity', 1)
+
+    d3.select('#range')
+    .delay(400)
+    .duration(300)
+    .style('opacity', 1)
+
+/*     g.append("g")
+    .attr("class", "legend")
+    .style("font-size", "12px")
+    .attr("transform", "translate(120,120)"); */
+
+/* const legend = d3.legendColor()
+    .labelFormat(d3.format(".1f"))
+    //.labelFormat(() => `${d3.format(".1f")()%}`)    
+    .shapeWidth(30)
+    .scale(color); */
+
+    function legend({
+        color,
+        title,
+        tickSize = 6,
+        width = 320, 
+        height = 44 + tickSize,
+        marginTop = 18,
+        marginRight = 0,
+        marginBottom = 16 + tickSize,
+        marginLeft = 0,
+        ticks = width / 64,
+        tickFormat,
+        tickValues
+      } = {}) {
+      
+        const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height])
+            .style("overflow", "visible")
+            .style("display", "block");
+      
+        let x;
+      
+        // Continuous
+        if (color.interpolator) {
+          x = Object.assign(color.copy()
+              .interpolator(d3.interpolateRound(marginLeft, width - marginRight)),
+              {range() { return [marginLeft, width - marginRight]; }});
+      
+          svg.append("image")
+              .attr("x", marginLeft)
+              .attr("y", marginTop)
+              .attr("width", width - marginLeft - marginRight)
+              .attr("height", height - marginTop - marginBottom)
+              .attr("preserveAspectRatio", "none")
+              .attr("xlink:href", ramp(color.interpolator()).toDataURL());
+      
+          // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
+          if (!x.ticks) {
+            if (tickValues === undefined) {
+              const n = Math.round(ticks + 1);
+              tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+            }
+            if (typeof tickFormat !== "function") {
+              tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+            }
+          }
+        }
+      
+        // Discrete
+        else if (color.invertExtent) {
+          const thresholds
+              = color.thresholds ? color.thresholds() // scaleQuantize
+              : color.quantiles ? color.quantiles() // scaleQuantile
+              : color.domain(); // scaleThreshold
+      
+          const thresholdFormat
+              = tickFormat === undefined ? d => d
+              : typeof tickFormat === "string" ? d3.format(tickFormat)
+              : tickFormat;
+      
+          x = d3.scaleLinear()
+              .domain([-1, color.range().length - 1])
+              .rangeRound([marginLeft, width - marginRight]);
+      
+          svg.append("g")
+            .selectAll("rect")
+            .data(color.range())
+            .join("rect")
+              .attr("x", (d, i) => x(i - 1))
+              .attr("y", marginTop)
+              .attr("width", (d, i) => x(i) - x(i - 1))
+              .attr("height", height - marginTop - marginBottom)
+              .attr("fill", d => d);
+      
+          tickValues = d3.range(thresholds.length);
+          tickFormat = i => thresholdFormat(thresholds[i], i);
+        }
+      
+        svg.append("g")
+            .attr("transform", `translate(0, ${height - marginBottom})`)
+            .call(d3.axisBottom(x)
+              .ticks(ticks, typeof tickFormat === "string" ? tickFormat : undefined)
+              .tickFormat(typeof tickFormat === "function" ? tickFormat : undefined)
+              .tickSize(tickSize)
+              .tickValues(tickValues))
+            .call(g => g.selectAll(".tick line").attr("y1", marginTop + marginBottom - height))
+            .call(g => g.select(".domain").remove())
+            .call(g => g.append("text")
+              .attr("y", marginTop + marginBottom - height - 6)
+              .attr("fill", "currentColor")
+              .attr("text-anchor", "start")
+              .attr("font-weight", "bold")
+              .text(title));
+      
+        return svg.node();
+      }
+
+      svg.append("g")
+      .attr("class", "legend")
+      .attr('transform', `translate(${width/2 + 100}, ${height-50})`)
+.append(() => legend({color, title: "share of affordable units (%)", width: 260,tickFormat: ".0f"}))
 
     /*     d3.selectAll('#tooltip')
             .style('background-color', 'rgba(30, 32, 32, 0.34)'); */
@@ -335,7 +499,16 @@ function handleStepEnter(response) {
     // response = { element, direction, index }
     console.log(response.index)
     //plot.attr('opacity', '1')
-    showMap();
+    if (response.index == 1) {
+        showBar();
+    }
+    if (response.index == 2) {
+        showPlot();
+    }
+    if (response.index == 3) {
+        showMap();
+    }
+
 
     //barAnimation();
     // fade in current step
@@ -365,3 +538,27 @@ function handleContainerExit(response) {
 
 // start it up
 init();
+
+function wrap(text, width) {
+    text.each(function() {
+      var text = d3.select(this),
+          words = text.text().split(/\s+/).reverse(),
+          word,
+          line = [],
+          lineNumber = 0,
+          lineHeight = 1.1, // ems
+          y = text.attr("y"),
+          dy = parseFloat(text.attr("dy")),
+          tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+      while (word = words.pop()) {
+        line.push(word);
+        tspan.text(line.join(" "));
+        if (tspan.node().getComputedTextLength() > width) {
+          line.pop();
+          tspan.text(line.join(" "));
+          line = [word];
+          tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+        }
+      }
+    });
+  }

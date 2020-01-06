@@ -102,24 +102,38 @@
 #sliderContainer {
     text-align: center;
     position: relative;
-    width: 200px;
-    top: 600px;
+    width: 250px;
+    left: 380px;
+    top: 700px;
 }
 
 #timeslide {
-    width: 150px;
+    width: 250px;
+    float: left;
+    opacity: 0;
 }
 
-/* .legend {
+#range{
+    opacity: 0;
+}
+
+.legend {
     position: absolute;
     left: 800px;
-} */
+}
 
 .axis line {
     fill: none;
     stroke: #000000;
     shape-rendering: crispEdges;
 }
+/* .bar {
+    z-index: -3;
+}
+
+.outline {
+    z-index:-2
+} */
 
 text {
     font-size: 16px;
