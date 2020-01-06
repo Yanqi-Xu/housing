@@ -286,7 +286,7 @@ function init() {
             text: '.scroll__text', // the step container
             step: '.scroll__text .step', // the step elements
             offset: 0.5, // set the trigger to be 1/2 way down screen
-            debug: true, // display the trigger offset for testing
+            debug: false, // display the trigger offset for testing
         })
         .onStepEnter(handleStepEnter)
         .onContainerEnter(handleContainerEnter)
@@ -364,11 +364,13 @@ function showMap() {
         .attr('opacity', 1);
 
     d3.select('#timeslide')
+        .transition()
         .delay(400)
         .duration(300)
         .style('opacity', 1)
 
     d3.select('#range')
+        .transition()
         .delay(400)
         .duration(300)
         .style('opacity', 1)
@@ -488,7 +490,7 @@ function showMap() {
 
     svg.append("g")
         .attr("class", "legend")
-        .attr('transform', `translate(${width/2 + 100}, ${height-50})`)
+        .attr('transform', `translate(${width/2 + 100}, ${height-110})`)
         .append(() => legend({
             color,
             title: "share of affordable units (%)",

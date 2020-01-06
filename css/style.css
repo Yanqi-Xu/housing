@@ -104,7 +104,7 @@
     position: relative;
     width: 250px;
     left: 380px;
-    top: 700px;
+    top: 600px;
 }
 
 #timeslide {
@@ -113,7 +113,7 @@
     opacity: 0;
 }
 
-#range{
+#range {
     opacity: 0;
 }
 
@@ -127,6 +127,7 @@
     stroke: #000000;
     shape-rendering: crispEdges;
 }
+
 /* .bar {
     z-index: -3;
 }
