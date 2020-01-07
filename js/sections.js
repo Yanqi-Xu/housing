@@ -88,12 +88,6 @@ Promise.all([
     const topo = ct.features[0];
     const topoTown = topojson.feature(topo, topo.objects.ct_towns);
     const towns = topoTown.features;
-    var mercatorProjection = d3.geoTransverseMercator()
-        .rotate([72.057, 41.513])
-        .fitExtent([
-            [10, 10],
-            [height - 10, width - 10]
-        ], topoTown);
 
     var albersProjection = d3.geoAlbers()
         .scale(9000)
@@ -165,7 +159,119 @@ Promise.all([
         .attr('opacity', 0)
         .attr("d", geoPath);
 
-
+        function legend({
+            color,
+            title,
+            tickSize = 6,
+            width = 320,
+            height = 44 + tickSize,
+            marginTop = 18,
+            marginRight = 0,
+            marginBottom = 16 + tickSize,
+            marginLeft = 0,
+            ticks = width / 64,
+            tickFormat,
+            tickValues
+        } = {}) {
+    
+            const svg = d3.create("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("viewBox", [0, 0, width, height])
+                .style("overflow", "visible")
+                .style("display", "block");
+    
+            let x;
+    
+            // Continuous
+            if (color.interpolator) {
+                x = Object.assign(color.copy()
+                    .interpolator(d3.interpolateRound(marginLeft, width - marginRight)), {
+                        range() {
+                            return [marginLeft, width - marginRight];
+                        }
+                    });
+    
+                svg.append("image")
+                    .attr("x", marginLeft)
+                    .attr("y", marginTop)
+                    .attr("width", width - marginLeft - marginRight)
+                    .attr("height", height - marginTop - marginBottom)
+                    .attr("preserveAspectRatio", "none")
+                    .attr("xlink:href", ramp(color.interpolator()).toDataURL());
+    
+                // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
+                if (!x.ticks) {
+                    if (tickValues === undefined) {
+                        const n = Math.round(ticks + 1);
+                        tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+                    }
+                    if (typeof tickFormat !== "function") {
+                        tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+                    }
+                }
+            }
+    
+            // Discrete
+            else if (color.invertExtent) {
+                const thresholds = color.thresholds ? color.thresholds() // scaleQuantize
+                    :
+                    color.quantiles ? color.quantiles() // scaleQuantile
+                    :
+                    color.domain(); // scaleThreshold
+    
+                const thresholdFormat = tickFormat === undefined ? d => d :
+                    typeof tickFormat === "string" ? d3.format(tickFormat) :
+                    tickFormat;
+    
+                x = d3.scaleLinear()
+                    .domain([-1, color.range().length - 1])
+                    .rangeRound([marginLeft, width - marginRight]);
+    
+                svg.append("g")
+                    .selectAll("rect")
+                    .data(color.range())
+                    .join("rect")
+                    .attr("x", (d, i) => x(i - 1))
+                    .attr("y", marginTop)
+                    .attr("width", (d, i) => x(i) - x(i - 1))
+                    .attr("height", height - marginTop - marginBottom)
+                    .attr("fill", d => d);
+    
+                tickValues = d3.range(thresholds.length);
+                tickFormat = i => thresholdFormat(thresholds[i], i);
+            }
+    
+            svg.append("g")
+                .attr("transform", `translate(0, ${height - marginBottom})`)
+                .call(d3.axisBottom(x)
+                    .ticks(ticks, typeof tickFormat === "string" ? tickFormat : undefined)
+                    .tickFormat(typeof tickFormat === "function" ? tickFormat : undefined)
+                    .tickSize(tickSize)
+                    .tickValues(tickValues))
+                .call(g => g.selectAll(".tick line").attr("y1", marginTop + marginBottom - height))
+                .call(g => g.select(".domain").remove())
+                .call(g => g.append("text")
+                    .attr("y", marginTop + marginBottom - height - 6)
+                    .attr("fill", "currentColor")
+                    .attr("text-anchor", "start")
+                    .attr("font-weight", "bold")
+                    .text(title));
+    
+            return svg.node();
+        }
+    
+        svg.append("g")
+            .attr("class", "legend")
+            .attr('opacity',0)
+            .attr('transform', `translate(${width/2 + 100}, ${height-110})`)
+            .append(() => legend({
+                color,
+                title: "share of affordable units (%)",
+                width: 260,
+                tickFormat: ".0f"
+            }))
+    
     /*         csvData.title = "Percentage of Affordable Housing Units"
             svg.append("g")
             .attr('class', 'legend')
@@ -329,6 +435,9 @@ function showBar() {
         .transition()
         .duration(200)
         .style('opacity', 1)
+
+        plot
+        .style('opacity', 0);
 }
 
 function showPlot() {
@@ -337,12 +446,41 @@ function showPlot() {
         .duration(300)
         .style('opacity', 0);
 
+    g
+    .select('.hline')
+    .transition()
+    .duration(300)
+    .style('fill', 'black')
+    .transition()
+    .duration(300)
+    .style('fill', 'red')
+    
+
     plot
         .transition()
         .delay(500)
         .duration(1000)
         .ease(d3.easeBounce)
         .style('opacity', 1);
+        
+        g.selectAll('.towns')
+        .attr('opacity', 0);
+
+        d3.select('#timeslide')
+        .transition()
+        .duration(300)
+        .style('opacity', 0)
+
+    d3.select('#range')
+        .transition()
+        .duration(300)
+        .style('opacity', 0)
+
+        d3.select('.legend')
+        .transition()
+        .duration(300)
+        .style('opacity', 0)
+
 }
 
 /* activateFunction[1] = showBar();
@@ -374,6 +512,12 @@ function showMap() {
         .delay(400)
         .duration(300)
         .style('opacity', 1)
+    
+        d3.select('.legend')
+        .transition()
+        .delay(500)
+        .duration(300)
+        .style('opacity', 1)
 
     /*     g.append("g")
         .attr("class", "legend")
@@ -386,118 +530,7 @@ function showMap() {
         .shapeWidth(30)
         .scale(color); */
 
-    function legend({
-        color,
-        title,
-        tickSize = 6,
-        width = 320,
-        height = 44 + tickSize,
-        marginTop = 18,
-        marginRight = 0,
-        marginBottom = 16 + tickSize,
-        marginLeft = 0,
-        ticks = width / 64,
-        tickFormat,
-        tickValues
-    } = {}) {
-
-        const svg = d3.create("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .attr("viewBox", [0, 0, width, height])
-            .style("overflow", "visible")
-            .style("display", "block");
-
-        let x;
-
-        // Continuous
-        if (color.interpolator) {
-            x = Object.assign(color.copy()
-                .interpolator(d3.interpolateRound(marginLeft, width - marginRight)), {
-                    range() {
-                        return [marginLeft, width - marginRight];
-                    }
-                });
-
-            svg.append("image")
-                .attr("x", marginLeft)
-                .attr("y", marginTop)
-                .attr("width", width - marginLeft - marginRight)
-                .attr("height", height - marginTop - marginBottom)
-                .attr("preserveAspectRatio", "none")
-                .attr("xlink:href", ramp(color.interpolator()).toDataURL());
-
-            // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
-            if (!x.ticks) {
-                if (tickValues === undefined) {
-                    const n = Math.round(ticks + 1);
-                    tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
-                }
-                if (typeof tickFormat !== "function") {
-                    tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
-                }
-            }
-        }
-
-        // Discrete
-        else if (color.invertExtent) {
-            const thresholds = color.thresholds ? color.thresholds() // scaleQuantize
-                :
-                color.quantiles ? color.quantiles() // scaleQuantile
-                :
-                color.domain(); // scaleThreshold
-
-            const thresholdFormat = tickFormat === undefined ? d => d :
-                typeof tickFormat === "string" ? d3.format(tickFormat) :
-                tickFormat;
-
-            x = d3.scaleLinear()
-                .domain([-1, color.range().length - 1])
-                .rangeRound([marginLeft, width - marginRight]);
-
-            svg.append("g")
-                .selectAll("rect")
-                .data(color.range())
-                .join("rect")
-                .attr("x", (d, i) => x(i - 1))
-                .attr("y", marginTop)
-                .attr("width", (d, i) => x(i) - x(i - 1))
-                .attr("height", height - marginTop - marginBottom)
-                .attr("fill", d => d);
-
-            tickValues = d3.range(thresholds.length);
-            tickFormat = i => thresholdFormat(thresholds[i], i);
-        }
-
-        svg.append("g")
-            .attr("transform", `translate(0, ${height - marginBottom})`)
-            .call(d3.axisBottom(x)
-                .ticks(ticks, typeof tickFormat === "string" ? tickFormat : undefined)
-                .tickFormat(typeof tickFormat === "function" ? tickFormat : undefined)
-                .tickSize(tickSize)
-                .tickValues(tickValues))
-            .call(g => g.selectAll(".tick line").attr("y1", marginTop + marginBottom - height))
-            .call(g => g.select(".domain").remove())
-            .call(g => g.append("text")
-                .attr("y", marginTop + marginBottom - height - 6)
-                .attr("fill", "currentColor")
-                .attr("text-anchor", "start")
-                .attr("font-weight", "bold")
-                .text(title));
-
-        return svg.node();
-    }
-
-    svg.append("g")
-        .attr("class", "legend")
-        .attr('transform', `translate(${width/2 + 100}, ${height-110})`)
-        .append(() => legend({
-            color,
-            title: "share of affordable units (%)",
-            width: 260,
-            tickFormat: ".0f"
-        }))
-
+   
     /*     d3.selectAll('#tooltip')
             .style('background-color', 'rgba(30, 32, 32, 0.34)'); */
 
