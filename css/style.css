@@ -89,9 +89,10 @@
 
 #tooltip {
     width: 240px;
-    color: rgba(255, 255, 255, 0);
+    color: #FFFFFF;
     font-size: 15px;
     text-shadow: 0px 0px 1px #000000;
+    background: #575757;
     height: 50px;
     padding: 2px;
     line-height: 15px;
