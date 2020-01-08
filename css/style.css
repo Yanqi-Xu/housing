@@ -18,7 +18,7 @@
 }
 
 .step {
-    margin-bottom: 200px;
+    margin-bottom: 10px;
     opacity: 0.5;
     padding: 1rem;
 }
@@ -55,7 +55,7 @@
     position: fixed;
     display: inline-block;
     margin-left: 0;
-    left: 550px;
+    left: 450px;
     -webkit-transform: translate3d(0, 0, 0);
     -moz-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
@@ -179,6 +179,11 @@ text {
     width: 400px;
 }
 
+.barnote {
+    position: absolute;
+    left: 180px;
+    top: 425px;
+}
 /* #vis {
     display: inline-block;
     position: fixed;

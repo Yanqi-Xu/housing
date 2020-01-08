@@ -37,8 +37,8 @@ burden.append('div')
     .attr('class', 'hline')
 
 burden.append('div')
-    .text(`HUD: A household should not spend more  
-    than 30% of its income on housing`)
+.attr('class','barnote')
+    .text(`Spending more than 30% of income is considered housing-burdened`)
 
 function barAnimation() {
     burden.select('.hline')
@@ -66,10 +66,12 @@ const g = svg.append("g")
 
 d3.select("body")
     .append('div')
+    .attr('data-toggle', "tooltip")
+    .attr('data-placement',"top")
     .attr('id', 'tooltip')
     .attr('style', 'position: absolute;')
 //.style('background-color', 'rgba(30, 32, 32, 0)')
-//.style('opacity', '0');
+    .style('opacity', '0');
 
 d3.select("#rate").html(
     "Year: " + year[year.length - 1]
@@ -435,6 +437,8 @@ function showBar() {
         .transition()
         .duration(200)
         .style('opacity', 1)
+    
+    $('#tooltip').tooltip('hide')
 
     plot
         .style('opacity', 0);
@@ -481,6 +485,7 @@ function showPlot() {
         .duration(300)
         .style('opacity', 0)
 
+
 }
 
 /* activateFunction[1] = showBar();
@@ -519,8 +524,6 @@ function showMap() {
         .duration(300)
         .style('opacity', 1)
 
-    d3.select('#tooltip')
-        .style('opacity', 1)
 
     /*     g.append("g")
         .attr("class", "legend")
@@ -548,13 +551,13 @@ function handleStepEnter(response) {
     // response = { element, direction, index }
     console.log(response.index)
     //plot.attr('opacity', '1')
-    if (response.index == 1) {
+    if (response.index == 0) {
         showBar();
     }
-    if (response.index == 2) {
+    if (response.index == 1) {
         showPlot();
     }
-    if (response.index == 3) {
+    if (response.index == 2) {
         showMap();
     }
 
