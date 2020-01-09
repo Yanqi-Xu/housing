@@ -3,7 +3,7 @@
     display: inline-block;
     top: 0;
     bottom: auto;
-    width: 280px;
+    width: 320px;
     -webkit-transform: translate3d(0, 0, 0);
     -moz-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
@@ -12,13 +12,13 @@
 #sections {
     position: relative;
     display: inline-block;
-    width: 300px;
+    width: 330px;
     top: 0;
     z-index: 1
 }
 
 .step {
-    margin-bottom: 10px;
+    margin-bottom: 140px;
     opacity: 0.5;
     padding: 1rem;
 }
@@ -184,6 +184,7 @@ text {
     left: 180px;
     top: 425px;
 }
+
 /* #vis {
     display: inline-block;
     position: fixed;
